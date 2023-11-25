@@ -6,6 +6,7 @@ from sqlalchemy.orm import declarative_base
 from sqlalchemy import create_engine
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.sql.expression import text
 
 load_dotenv()
 username = os.getenv("DB_USERNAME")
@@ -27,7 +28,7 @@ class User(Base):
     __tablename__ = "users"
 
     id = sq.Column(sq.Integer, primary_key=True)
-    user_id = sq.Column(sq.Integer)
+    user_id = sq.Column(sq.TEXT)
     prompt = sq.Column(sq.TEXT)
     bot = sq.Column(sq.TEXT)
     counter = sq.Column(sq.Integer)
@@ -39,11 +40,48 @@ Session = sessionmaker(bind=engine)
 session = Session()
 
 
-def get_or_create_user(user_id):
-    user = session.query(User).filter_by(username=username).first()
+def get_or_create_user(user_id, bot_name):
+    user = session.query(User).filter_by(user_id=user_id).first()
     if user:
         user.counter += 1
     else:
-        user = User(username=user_id, counter=1)
+        user = User(user_id=user_id, counter=1, prompt="", bot=bot_name)
         session.add(user)
     return user
+
+
+def increase_counter(user_id):
+    try:
+        user_id = user_id
+        session.query(User).filter(User.user_id == user_id).update({'counter': User.counter + 1})
+        session.commit()
+    except SQLAlchemyError as e:
+        print(f"Error while working with database: {e}")
+    finally:
+        session.close()
+    return "ok"
+
+
+def update_prompt(user_id, prompt):
+    try:
+        user_id = user_id
+        current_prompt = session.query(User).filter(User.user_id == user_id).first().prompt
+        updated_prompt = current_prompt + prompt
+        session.query(User).filter(User.user_id == user_id).update({'prompt': updated_prompt})
+        session.commit()
+    except SQLAlchemyError as e:
+        print(f"Error while working with database: {e}")
+    finally:
+        session.close()
+
+
+def get_prompt(user_id):
+    try:
+        user_id = user_id
+        current_prompt = session.query(User).filter(User.user_id == user_id).first().prompt
+        return current_prompt
+        session.commit()
+    except SQLAlchemyError as e:
+        print(f"Error while working with database: {e}")
+    finally:
+        session.close()

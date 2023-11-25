@@ -26,6 +26,8 @@ dp.include_router(begin.router)
 client = AsyncOpenAI(
     api_key=openai_key
 )
+bot_name = "masterbot"
+personage = "Дед Мороз"
 
 
 @dp.message(F.voice)
