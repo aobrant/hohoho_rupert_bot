@@ -28,7 +28,7 @@ class User(Base):
     __tablename__ = "users"
 
     id = sq.Column(sq.Integer, primary_key=True)
-    user_id = sq.Column(sq.TEXT)
+    user_id = sq.Column(sq.Integer)
     prompt = sq.Column(sq.TEXT)
     bot = sq.Column(sq.TEXT)
     counter = sq.Column(sq.Integer)
