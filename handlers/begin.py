@@ -77,7 +77,7 @@ async def message_response(message: types.Message):
                     }
                 ],
                 # model="gpt-3.5-turbo",
-                model="gpt - 4 - 1106 - preview",
+                model="gpt-4-32k",
             )
             gpt_reply = chat_completion.choices[0].message.content
             update_prompt(user_id, user_text)
