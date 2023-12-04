@@ -14,8 +14,10 @@ personage = "Дед Мороз"
 
 
 help_message = text(
-    "/start",
-    "/help",
+    "/start старт",
+    "/help это сообщение",
+    "/erase обнулить счетчик",
+    "/pic генерация картинки",
     sep="\n"
 )
 

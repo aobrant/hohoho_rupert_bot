@@ -42,10 +42,8 @@ session = Session()
 
 def get_or_create_user(user_id, bot_name):
     user = session.query(User).filter_by(user_id=user_id).first()
-    if user:
-        user.counter += 1
-    else:
-        user = User(user_id=user_id, counter=1, prompt="", bot=bot_name)
+    if not user:
+        user = User(user_id=user_id, counter=0, prompt="", bot=bot_name)
         session.add(user)
     return user
 
@@ -54,6 +52,19 @@ def increase_counter(user_id):
     try:
         user_id = user_id
         session.query(User).filter(User.user_id == user_id).update({'counter': User.counter + 1})
+        session.commit()
+    except SQLAlchemyError as e:
+        print(f"Error while working with database: {e}")
+    finally:
+        session.close()
+    return "ok"
+
+
+def re_counter(user_id):
+    try:
+        user_id = user_id
+        session.query(User).filter(User.user_id == user_id).update({'counter': 1})
+        session.query(User).filter(User.user_id == user_id).update({'prompt': ""})
         session.commit()
     except SQLAlchemyError as e:
         print(f"Error while working with database: {e}")

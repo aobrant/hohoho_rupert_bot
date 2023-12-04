@@ -5,7 +5,7 @@ from openai import AsyncOpenAI
 from aiogram.filters import Command
 from dotenv import load_dotenv
 from misc import help_message, picture, check_message
-from sql_intergrate import get_or_create_user, increase_counter, update_prompt, get_prompt
+from sql_intergrate import get_or_create_user, increase_counter, update_prompt, get_prompt, re_counter
 from misc import bot_name, personage
 
 router = Router()
@@ -45,23 +45,29 @@ async def pic_test(message: types.Message):
         print(f"Произошла ошибка при удалении файла: {str(e)}")
 
 
+@router.message(Command("erase"))
+async def erase_counter(message: types.Message):
+    user_id = message.from_user.id
+    re_counter(user_id)
+    await message.answer("ok")
+
+
 @router.message(F.text)
 async def message_response(message: types.Message):
     user_id = message.from_user.id
     user = get_or_create_user(user_id, bot_name)
     counter = user.counter
     if counter < 20:
-        counter += 1
         user_text = message.text
         message_status = check_message(user_text)
         if message_status == "good":
             increase_counter(user_id)
             old_prompt = get_prompt(user_id)
             prompt = "Ты " + personage + ", настоящий, все по канону. На все вопросы отвечаешь, как если бы ты был " \
-                     "им. Важно — тебе могут писать дети,и ты обязан соблюдать возрастное " \
-                     "ограничение PG-13. Стараешься давать им добрые, хорошие советы и пожелания, " \
-                     "даже если они пишут грубости. Прредыдущий разговор был такой '" + old_prompt + \
-                     "', учти это но на старые вопросы не отвыечай, а теперь отвечай  на новый вопрос с учетом предыдущего диалого. Новый вопрос " + user_text
+                                         "им. Важно — тебе могут писать дети,и ты обязан соблюдать возрастное " \
+                                         "ограничение PG-13. Стараешься давать им добрые, хорошие советы и пожелания, " \
+                                         "даже если они пишут грубости. Прредыдущий разговор был такой '" + old_prompt + \
+                     "', учти это но на старые вопросы не отвыечай, а теперь отвечай  на новый вопрос с учетом предыдущего диалого. На грубые вопросы не отвечай. Новый вопрос " + user_text
 
             chat_completion = await client.chat.completions.create(
                 messages=[
@@ -89,7 +95,7 @@ async def message_response(message: types.Message):
     elif counter == 20:
         text = "Ну вот и поговорили достаточно. Время идти дальше, столько дел перед праздниками!"
         old_prompt = get_prompt(user_id)
-        content = "Ты " + personage + ", настоящий, все по канону. Предыдущие темы разговора'"+ old_prompt + "' Возьми из них основные три темы волнующие собеседника и нарисуй на основании их картинку"
+        content = "Ты " + personage + ", настоящий, все по канону. Предыдущие темы разговора'" + old_prompt + "' Возьми из них основные три темы волнующие собеседника и нарисуй на основании их картинку"
         filepath = await picture(content, user_id)
         cat = FSInputFile(filepath)
         await message.answer_photo(cat)
@@ -101,6 +107,7 @@ async def message_response(message: types.Message):
             print(f"Произошла ошибка при удалении файла: {str(e)}")
         await message.answer(text)
         increase_counter(user_id)
-    else:
+    elif counter > 20:
         increase_counter(user_id)
         message.answer("С Новым Годом мой маленький друг")
+
