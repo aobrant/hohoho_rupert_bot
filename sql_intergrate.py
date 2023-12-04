@@ -6,6 +6,7 @@ from sqlalchemy.orm import declarative_base
 from sqlalchemy import create_engine
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy import cast, Integer
 from sqlalchemy.sql.expression import text
 
 load_dotenv()
@@ -41,7 +42,8 @@ session = Session()
 
 
 def get_or_create_user(user_id, bot_name):
-    user = session.query(User).filter_by(user_id=user_id).first()
+    # user = session.query(User).filter_by(user_id=user_id).first()
+    user = session.query(User).filter_by(user_id=cast(user_id, Integer)).first()
     if not user:
         user = User(user_id=user_id, counter=0, prompt="", bot=bot_name)
         session.add(user)
