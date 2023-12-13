@@ -57,7 +57,7 @@ async def message_response(message: types.Message):
     user_id = message.from_user.id
     user = get_or_create_user(user_id, bot_name)
     counter = user.counter
-    if counter < 20:
+    if counter < 10:
         user_text = message.text
         message_status = check_message(user_text)
         if message_status == "good":
@@ -94,7 +94,7 @@ async def message_response(message: types.Message):
         else:
             await message.answer("Чтото пошло не так")
             increase_counter(user_id)
-    elif counter == 20:
+    elif counter == 10:
         text = "Ну вот и поговорили достаточно. Время идти дальше, столько дел перед праздниками!"
         old_prompt = get_prompt(user_id)
         content = "Ты " + personage + ", настоящий, все по канону. Предыдущие темы разговора'" + old_prompt + "' Возьми из них основные три темы волнующие собеседника и нарисуй на основании их картинку"
@@ -109,7 +109,7 @@ async def message_response(message: types.Message):
             print(f"Произошла ошибка при удалении файла: {str(e)}")
         await message.answer(text)
         increase_counter(user_id)
-    elif counter > 20:
+    elif counter > 10:
         increase_counter(user_id)
         text = "С Новым Годом мой маленький друг"
         await message.answer(text)
